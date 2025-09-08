@@ -5,7 +5,7 @@ lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "$organization$",
-      scalaVersion := "2.13.14",
+      scalaVersion := "3.3.6",
       name := "$name$"
     )),
     name := "TestProject",
@@ -14,7 +14,7 @@ lazy val root = (project in file(".")).
       "org.apache.pekko" %% "pekko-actor-typed"     % pekkoVersion,
       "org.apache.pekko" %% "pekko-stream"          % pekkoVersion,
       "org.apache.pekko" %% "pekko-http-jackson"    % pekkoHttpVersion,
-      "ch.qos.logback"    % "logback-classic"        % "1.3.14",
+      "ch.qos.logback"    % "logback-classic"        % "1.3.15",
 
       "org.apache.pekko" %% "pekko-testkit"                 % pekkoVersion     % Test,
       "org.apache.pekko" %% "pekko-http-testkit"            % pekkoHttpVersion % Test,
