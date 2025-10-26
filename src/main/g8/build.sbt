@@ -5,7 +5,7 @@ lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "$organization$",
-      scalaVersion := "3.3.6",
+      scalaVersion := "3.3.7",
       name := "$name$"
     )),
     name := "TestProject",
@@ -20,7 +20,7 @@ lazy val root = (project in file(".")).
       "org.apache.pekko" %% "pekko-http-testkit"            % pekkoHttpVersion % Test,
       "org.apache.pekko" %% "pekko-actor-testkit-typed"     % pekkoVersion     % Test,
       "junit"             % "junit"                         % "4.13.2"         % Test,
-      "com.novocode"      % "junit-interface"               % "0.11"           % Test
+      "com.github.sbt"    % "junit-interface"               % "0.13.3"         % Test
     ),
 
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
