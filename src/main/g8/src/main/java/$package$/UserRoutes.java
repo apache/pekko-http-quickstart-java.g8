@@ -1,7 +1,6 @@
 package $package$;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import $package$.UserRegistry.User;
@@ -19,13 +18,11 @@ import org.apache.pekko.http.javadsl.server.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Routes can be defined in separated classes like shown in here
- */
-//#user-routes-class
+/** Routes can be defined in separated classes like shown in here */
+// #user-routes-class
 public class UserRoutes {
-  //#user-routes-class
-  private final static Logger log = LoggerFactory.getLogger(UserRoutes.class);
+  // #user-routes-class
+  private static final Logger log = LoggerFactory.getLogger(UserRoutes.class);
   private final ActorRef<UserRegistry.Command> userRegistryActor;
   private final Duration askTimeout;
   private final Scheduler scheduler;
@@ -37,11 +34,13 @@ public class UserRoutes {
   }
 
   private CompletionStage<UserRegistry.GetUserResponse> getUser(String name) {
-    return AskPattern.ask(userRegistryActor, ref -> new UserRegistry.GetUser(name, ref), askTimeout, scheduler);
+    return AskPattern.ask(
+        userRegistryActor, ref -> new UserRegistry.GetUser(name, ref), askTimeout, scheduler);
   }
 
   private CompletionStage<UserRegistry.ActionPerformed> deleteUser(String name) {
-    return AskPattern.ask(userRegistryActor, ref -> new UserRegistry.DeleteUser(name, ref), askTimeout, scheduler);
+    return AskPattern.ask(
+        userRegistryActor, ref -> new UserRegistry.DeleteUser(name, ref), askTimeout, scheduler);
   }
 
   private CompletionStage<UserRegistry.Users> getUsers() {
@@ -49,64 +48,77 @@ public class UserRoutes {
   }
 
   private CompletionStage<UserRegistry.ActionPerformed> createUser(User user) {
-    return AskPattern.ask(userRegistryActor, ref -> new UserRegistry.CreateUser(user, ref), askTimeout, scheduler);
+    return AskPattern.ask(
+        userRegistryActor, ref -> new UserRegistry.CreateUser(user, ref), askTimeout, scheduler);
   }
 
-  /**
-   * This method creates one route (of possibly many more that will be part of your Web App)
-   */
-  //#all-routes
+  /** This method creates one route (of possibly many more that will be part of your Web App) */
+  // #all-routes
   public Route userRoutes() {
-    return pathPrefix("users", () ->
-        concat(
-            //#users-get-delete
-            pathEnd(() ->
-                concat(
-                    get(() ->
-                        onSuccess(getUsers(),
-                            users -> complete(StatusCodes.OK, users, Jackson.marshaller())
-                        )
-                    ),
-                    post(() ->
-                        entity(
-                            Jackson.unmarshaller(User.class),
-                            user ->
-                                onSuccess(createUser(user), performed -> {
-                                  log.info("Create result: {}", performed.description());
-                                  return complete(StatusCodes.CREATED, performed, Jackson.marshaller());
-                                })
-                        )
-                    )
-                )
-            ),
-            //#users-get-delete
-            //#users-get-post
-            path(PathMatchers.segment(), (String name) ->
-                concat(
-                    get(() ->
-                            //#retrieve-user-info
-                            rejectEmptyResponse(() ->
-                                onSuccess(getUser(name), performed ->
-                                    complete(StatusCodes.OK, performed.maybeUser(), Jackson.marshaller())
-                                )
-                            )
-                        //#retrieve-user-info
-                    ),
-                    delete(() ->
-                            //#users-delete-logic
-                            onSuccess(deleteUser(name), performed -> {
-                                  log.info("Delete result: {}", performed.description());
-                                  return complete(StatusCodes.OK, performed, Jackson.marshaller());
-                                }
-                            )
-                        //#users-delete-logic
-                    )
-                )
-            )
-            //#users-get-post
-        )
-    );
+    return pathPrefix(
+        "users",
+        () ->
+            concat(
+                // #users-get-delete
+                pathEnd(
+                    () ->
+                        concat(
+                            get(
+                                () ->
+                                    onSuccess(
+                                        getUsers(),
+                                        users ->
+                                            complete(StatusCodes.OK, users, Jackson.marshaller()))),
+                            post(
+                                () ->
+                                    entity(
+                                        Jackson.unmarshaller(User.class),
+                                        user ->
+                                            onSuccess(
+                                                createUser(user),
+                                                performed -> {
+                                                  log.info(
+                                                      "Create result: {}", performed.description());
+                                                  return complete(
+                                                      StatusCodes.CREATED,
+                                                      performed,
+                                                      Jackson.marshaller());
+                                                }))))),
+                // #users-get-delete
+                // #users-get-post
+                path(
+                    PathMatchers.segment(),
+                    (String name) ->
+                        concat(
+                            get(
+                                () ->
+                                    // #retrieve-user-info
+                                    rejectEmptyResponse(
+                                        () ->
+                                            onSuccess(
+                                                getUser(name),
+                                                performed ->
+                                                    complete(
+                                                        StatusCodes.OK,
+                                                        performed.maybeUser(),
+                                                        Jackson.marshaller())))
+                                // #retrieve-user-info
+                                ),
+                            delete(
+                                () ->
+                                    // #users-delete-logic
+                                    onSuccess(
+                                        deleteUser(name),
+                                        performed -> {
+                                          log.info("Delete result: {}", performed.description());
+                                          return complete(
+                                              StatusCodes.OK, performed, Jackson.marshaller());
+                                        })
+                                // #users-delete-logic
+                                )))
+                // #users-get-post
+                ));
   }
-  //#all-routes
+  // #all-routes
 
 }
