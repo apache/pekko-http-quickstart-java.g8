@@ -6,36 +6,36 @@ import org.apache.pekko.actor.typed.javadsl.AbstractBehavior;
 import org.apache.pekko.actor.typed.javadsl.ActorContext;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.apache.pekko.actor.typed.javadsl.Receive;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.*;
 
-//#user-registry-actor
-public class UserRegistry extends AbstractBehavior<UserRegistry.Command>  {
+// #user-registry-actor
+public class UserRegistry extends AbstractBehavior<UserRegistry.Command> {
 
   // actor protocol
   sealed interface Command {}
 
-  public final static record GetUsers(ActorRef<Users> replyTo) implements Command {}
+  public static final record GetUsers(ActorRef<Users> replyTo) implements Command {}
 
-  public final static record CreateUser(User user, ActorRef<ActionPerformed> replyTo) implements Command {}
+  public static final record CreateUser(User user, ActorRef<ActionPerformed> replyTo)
+      implements Command {}
 
-  public final static record GetUserResponse(Optional<User> maybeUser) {}
+  public static final record GetUserResponse(Optional<User> maybeUser) {}
 
-  public final static record GetUser(String name, ActorRef<GetUserResponse> replyTo) implements Command {}
+  public static final record GetUser(String name, ActorRef<GetUserResponse> replyTo)
+      implements Command {}
 
+  public static final record DeleteUser(String name, ActorRef<ActionPerformed> replyTo)
+      implements Command {}
 
-  public final static record DeleteUser(String name, ActorRef<ActionPerformed> replyTo) implements Command {}
+  public static final record ActionPerformed(String description) implements Command {}
 
+  // #user-case-classes
+  public static final record User(String name, int age, String countryOfResidence) {}
 
-  public final static record ActionPerformed(String description) implements Command {}
+  public static final record Users(List<User> users) {}
 
-  //#user-case-classes
-  public final static record User(String name, int age, String countryOfResidence) {}
-
-  public final static record Users(List<User> users) {}
-  //#user-case-classes
+  // #user-case-classes
 
   private final List<User> users = new ArrayList<>();
 
@@ -66,14 +66,15 @@ public class UserRegistry extends AbstractBehavior<UserRegistry.Command>  {
 
   private Behavior<Command> onCreateUser(CreateUser command) {
     users.add(command.user());
-    command.replyTo().tell(new ActionPerformed(String.format("User %s created.", command.user().name())));
+    command
+        .replyTo()
+        .tell(new ActionPerformed(String.format("User %s created.", command.user().name())));
     return this;
   }
 
   private Behavior<Command> onGetUser(GetUser command) {
-    Optional<User> maybeUser = users.stream()
-        .filter(user -> user.name().equals(command.name()))
-        .findFirst();
+    Optional<User> maybeUser =
+        users.stream().filter(user -> user.name().equals(command.name())).findFirst();
     command.replyTo().tell(new GetUserResponse(maybeUser));
     return this;
   }
@@ -83,6 +84,5 @@ public class UserRegistry extends AbstractBehavior<UserRegistry.Command>  {
     command.replyTo().tell(new ActionPerformed(String.format("User %s deleted.", command.name)));
     return this;
   }
-
 }
-//#user-registry-actor
+// #user-registry-actor
